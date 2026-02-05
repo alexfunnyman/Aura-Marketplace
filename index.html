@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -69,10 +69,15 @@
 
         .filters-container {
             padding: 15px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 10px;
-            align-items: center;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
         }
 
         .filter-select, .filter-btn {
@@ -84,23 +89,23 @@
             font-size: 13px;
             outline: none;
             appearance: none;
+            flex: 1;
             text-align: center;
         }
 
-        /* Кнопка удаления фильтров */
         .clear-filters-btn {
             background: var(--card-bg);
             border: 1px solid var(--border);
             color: var(--danger);
-            width: 44px;
-            height: 44px;
+            width: 46px;
+            height: 46px;
             border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 18px;
             cursor: pointer;
-            transition: 0.2s;
+            flex-shrink: 0;
         }
 
         .clear-filters-btn:active {
@@ -108,7 +113,7 @@
             background: rgba(255, 59, 48, 0.1);
         }
 
-        .full-width { grid-column: span 2; }
+        .full-width { width: 100%; }
 
         .page-content { display: none; padding: 0 15px; animation: fadeIn 0.3s ease; }
         .page-content.active { display: grid; }
@@ -123,7 +128,6 @@
             border-radius: 24px;
             padding: 12px;
             text-align: center;
-            margin-bottom: 5px;
         }
 
         .item-preview {
@@ -178,9 +182,9 @@
     </header>
 
     <div id="market-filters" class="filters-container">
-        <div style="display: flex; gap: 10px; grid-column: span 1;">
-            <select class="filter-select" id="gift-selector" onchange="filterGifts()" style="flex: 1;">
-                <option value="all">Название подарка</option>
+        <div class="filter-row">
+            <select class="filter-select" id="gift-selector" onchange="filterGifts()">
+                <option value="all">Gift Name</option>
                 <option value="Rare Bird">Rare Bird</option>
                 <option value="Victory Medal">Victory Medal</option>
                 <option value="Artisan Brick">Artisan Brick</option>
@@ -196,17 +200,21 @@
                 <option value="Plush Pepe">Plush Pepe</option>
                 <option value="Heroic Helmet">Heroic Helmet</option>
             </select>
-            <div class="clear-filters-btn" onclick="resetFilters()" title="Удалить все фильтры">🗑</div>
+            
+            <select class="filter-select"><option>Model</option></select>
+            
+            <div class="clear-filters-btn" onclick="resetFilters()">🗑️</div>
         </div>
         
-        <select class="filter-select"><option>Модель</option></select>
-        <button class="filter-btn">Каталог фонов</button>
-        <button class="filter-btn">Узоры</button>
-        <select class="filter-select full-width"><option>Сортировка: недавно добавленные</option></select>
+        <div class="filter-row">
+            <button class="filter-btn">Background Catalog</button>
+            <button class="filter-btn">Patterns</button>
+        </div>
+        
+        <select class="filter-select full-width"><option>Sort by: Recently added</option></select>
     </div>
 
     <div id="market-page" class="page-content active grid-2"></div>
-
     <div id="auctions-page" class="page-content grid-2"></div>
     <div id="gifts-page" class="page-content"></div>
     <div id="activity-page" class="page-content"></div>
@@ -221,17 +229,16 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+        tg.ready(); tg.expand();
 
         const inventory = [
-            { name: "Rare Bird", price: 15, icon: "🐦‍⬛" },
+            { name: "Rare Bird", price: 15, icon: "🐦" },
             { name: "Victory Medal", price: 20, icon: "🏅" },
             { name: "Artisan Brick", price: 5, icon: "🧱" },
             { name: "Astral Shard", price: 12, icon: "✨" },
             { name: "B-Day Candle", price: 2, icon: "🎂" },
             { name: "Berry Box", price: 8, icon: "🍓" },
-            { name: "Big Year", price: 19, icon: "🗓" },
+            { name: "Big Year", price: 19, icon: "🗓️" },
             { name: "Bling Binky", price: 7, icon: "🍼" },
             { name: "Bonded Ring", price: 30, icon: "💍" },
             { name: "Bow Tie", price: 4, icon: "🎀" },
@@ -243,16 +250,13 @@
 
         function renderMarket(filter = "all") {
             const container = document.getElementById('market-page');
-            const filteredItems = filter === "all" 
-                ? inventory 
-                : inventory.filter(item => item.name === filter);
-
+            const filteredItems = filter === "all" ? inventory : inventory.filter(item => item.name === filter);
             container.innerHTML = filteredItems.map(item => `
                 <div class="item-card">
                     <div class="item-preview">${item.icon}</div>
                     <div class="item-name">${item.name}</div>
                     <div class="item-price">${item.price} TON</div>
-                    <button class="btn-main" onclick="buy('${item.name}')">Купить</button>
+                    <button class="btn-main" onclick="buy('${item.name}')">Buy</button>
                 </div>
             `).join('');
         }
@@ -272,13 +276,14 @@
         function showPage(pageId) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('market-filters').style.display = (pageId === 'market') ? 'grid' : 'none';
+            document.getElementById('market-filters').style.display = (pageId === 'market') ? 'flex' : 'none';
             document.getElementById(pageId + '-page').classList.add('active');
-            document.getElementById('nav-' + pageId).classList.add('active');
+            const navBtn = document.getElementById('nav-' + pageId);
+            if(navBtn) navBtn.classList.add('active');
             tg.HapticFeedback.impactOccurred('light');
         }
 
-        function buy(name) { tg.showConfirm("Купить " + name + "?"); }
+        function buy(name) { tg.showConfirm("Do you want to buy " + name + "?"); }
 
         renderMarket();
 
