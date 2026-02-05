@@ -185,32 +185,14 @@
         <div class="filter-row">
             <select class="filter-select" id="gift-selector" onchange="filterGifts()">
                 <option value="all">Gifts</option>
-                <option value="Rare Bird">Rare Bird</option>
-                <option value="Victory Medal">Victory Medal</option>
-                <option value="Artisan Brick">Artisan Brick</option>
-                <option value="Astral Shard">Astral Shard</option>
-                <option value="B-Day Candle">B-Day Candle</option>
-                <option value="Berry Box">Berry Box</option>
-                <option value="Big Year">Big Year</option>
-                <option value="Bling Binky">Bling Binky</option>
-                <option value="Bonded Ring">Bonded Ring</option>
-                <option value="Bow Tie">Bow Tie</option>
-                <option value="Bunny Muffin">Bunny Muffin</option>
-                <option value="Heart Locket">Heart Locket</option>
-                <option value="Plush Pepe">Plush Pepe</option>
-                <option value="Heroic Helmet">Heroic Helmet</option>
-            </select>
-            
+                </select>
             <select class="filter-select"><option>Model</option></select>
-            
             <div class="clear-filters-btn" onclick="resetFilters()">🗑️</div>
         </div>
-        
         <div class="filter-row">
             <button class="filter-btn">Background</button>
             <button class="filter-btn">Symbol</button>
         </div>
-        
         <select class="filter-select full-width"><option>Sort by: Recently added</option></select>
     </div>
 
@@ -231,22 +213,45 @@
         const tg = window.Telegram.WebApp;
         tg.ready(); tg.expand();
 
-        const inventory = [
-            { name: "Rare Bird", price: 15, icon: "🐦" },
-            { name: "Victory Medal", price: 20, icon: "🏅" },
-            { name: "Artisan Brick", price: 5, icon: "🧱" },
-            { name: "Astral Shard", price: 12, icon: "✨" },
-            { name: "B-Day Candle", price: 2, icon: "🎂" },
-            { name: "Berry Box", price: 8, icon: "🍓" },
-            { name: "Big Year", price: 19, icon: "🗓️" },
-            { name: "Bling Binky", price: 7, icon: "🍼" },
-            { name: "Bonded Ring", price: 30, icon: "💍" },
-            { name: "Bow Tie", price: 4, icon: "🎀" },
-            { name: "Bunny Muffin", price: 6, icon: "🧁" },
-            { name: "Heart Locket", price: 18, icon: "📿" },
-            { name: "Plush Pepe", price: 50, icon: "🐸" },
-            { name: "Heroic Helmet", price: 25, icon: "🪖" }
+        // New extensive gift names list
+        const giftNames = [
+            "Heart Locket", "Plush Pepe", "Heroic Helmet", "Mighty Arm", "Ion Gem", 
+            "Durov's Cap", "Nail Bracelet", "Perfume Bottle", "Magic Potion", "Mini Oscar", 
+            "Astral Shard", "Artisan Brick", "Gem Signet", "Sharp Tongue", "Moon Pendant", 
+            "Lunar Snake", "Holiday Drink", "Record Player", "Joyful Bundle", "Restless Jar", 
+            "Big Year", "Light Sword", "Jingle Bells", "Eternal Candle", "Skull Flower", 
+            "Sakura Flower", "Jelly Bunny", "Cupid Charm", "Hanging Star", "Easter Egg", 
+            "Spy Agaric", "Homemade Cake", "Snow Globe", "Xmas Stocking", "B-Day Candle", 
+            "Candy Cane", "Lush Bouquet", "Top Hat", "Scared Cat", "Spiced Wine", 
+            "Evil Eye", "Ionic Dryer", "Ginger Cookie", "Hex Pot", "Stellar Rocket", 
+            "Trapped Heart", "Snake Box", "Loot Bag", "Electric Skull", "Love Candle", 
+            "Jack-in-the-Box", "Witch Hat", "Love Potion", "Kissed Frog", "Diamond Ring", 
+            "Neko Helmet", "Pet Snake", "Jester Hat", "Flying Broom", "Party Sparkler", 
+            "Star Notepad", "Voodoo Doll", "Bonded Ring", "Snow Mittens", "Crystal Ball", 
+            "Berry Box", "Tama Gadget", "Valentine Box", "Cookie Heart", "Precious Peach", 
+            "Bow Tie", "Signet Ring", "Lol Pop", "Santa Hat", "Hypno Lollipop", 
+            "Winter Wreath", "Vintage Cigar", "Bunny Muffin", "Mad Pumpkin", "Eternal Rose", 
+            "Jolly Chimp", "Input Key", "Desk Calendar", "Swiss Watch", "Sleigh Bell", 
+            "Toy Bear", "Sky Stilettos", "Fresh Socks", "Clover Pin", "Instant Ramen", 
+            "Mousse Cake", "Spring Basket", "Faith Amulet", "UFC Strike", "Snoop Dogg", 
+            "Swag Bag", "Snoop Cigar", "Low Rider", "Westside Sign", "Khabib’s Papakha"
         ];
+
+        // Generate inventory based on the names (default price and icon for now)
+        const inventory = giftNames.map(name => ({
+            name: name,
+            price: Math.floor(Math.random() * 50) + 5, // Random price for demo
+            icon: "🎁" // Placeholder icon
+        }));
+
+        // Fill the dropdown filter
+        const selector = document.getElementById('gift-selector');
+        giftNames.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            selector.appendChild(opt);
+        });
 
         function renderMarket(filter = "all") {
             const container = document.getElementById('market-page');
