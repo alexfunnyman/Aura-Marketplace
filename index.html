@@ -22,7 +22,7 @@
             color: var(--text-main);
             font-family: -apple-system, system-ui, sans-serif;
             margin: 0;
-            padding-bottom: 160px; /* Запас под корзину и меню */
+            padding-bottom: 160px;
             overflow-x: hidden;
         }
 
@@ -43,7 +43,6 @@
             display: flex; align-items: center; justify-content: center; font-size: 20px;
         }
 
-        /* FILTERS */
         .filters-container { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
         .filter-row { display: flex; gap: 10px; width: 100%; }
         .filter-select, .filter-btn {
@@ -59,7 +58,6 @@
             cursor: pointer;
         }
 
-        /* GRID */
         .page-content { display: none; padding: 0 15px; animation: fadeIn 0.3s ease; }
         .page-content.active { display: grid; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -88,9 +86,8 @@
 
         .item-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; height: 34px; display: flex; align-items: center; justify-content: center; }
         .item-price { color: var(--ton-color); font-weight: 800; font-size: 15px; }
-        .btn-main { margin-top: 12px; width: 100%; padding: 10px; border-radius: 12px; border: none; background: #fff; color: #000; font-weight: 800; font-size: 12px; }
+        .btn-main { margin-top: 12px; width: 100%; padding: 10px; border-radius: 12px; border: none; background: #fff; color: #000; font-weight: 800; font-size: 12px; cursor: pointer; }
 
-        /* FLOATING CHECKOUT BAR */
         #checkout-bar {
             position: fixed; bottom: 85px; left: 15px; right: 15px;
             background: #1c1c1e; border: 1px solid var(--border);
@@ -104,7 +101,6 @@
         .checkout-count { font-size: 12px; color: var(--text-secondary); display: block; }
         .btn-checkout { background: #fff; color: #000; border: none; padding: 8px 20px; border-radius: 10px; font-weight: 800; cursor: pointer; }
 
-        /* NAV */
         nav {
             position: fixed; bottom: 0; width: 100%; background: rgba(10,10,10,0.95);
             border-top: 1px solid var(--border); display: flex; justify-content: space-around;
@@ -119,7 +115,7 @@
 
     <header>
         <div class="left-side">
-            <div class="balance">1.23<span>TON</span></div>
+            <div class="balance"><span id="user-balance">100.00</span><span>TON</span></div>
             <div class="profile-btn" onclick="showPage('profile')">👤</div>
         </div>
         <div id="ton-connect-button"></div>
@@ -135,7 +131,6 @@
             <button class="filter-btn">Background</button>
             <button class="filter-btn">Symbol</button>
         </div>
-        <select class="filter-select"><option>Sort by: Recently added</option></select>
     </div>
 
     <div id="market-page" class="page-content active grid-2"></div>
@@ -163,15 +158,17 @@
         const tg = window.Telegram.WebApp;
         tg.ready(); tg.expand();
 
+        let userBalance = 100.00;
         let cart = [];
         let myGifts = [];
+        let purchasedIds = new Set(); // ID купленных товаров
 
         const giftNames = [
             "Heart Locket", "Plush Pepe", "Heroic Helmet", "Mighty Arm", "Ion Gem", "Durov's Cap", "Nail Bracelet", "Perfume Bottle", "Magic Potion", "Mini Oscar", "Astral Shard", "Artisan Brick", "Gem Signet", "Sharp Tongue", "Moon Pendant", "Lunar Snake", "Holiday Drink", "Record Player", "Joyful Bundle", "Restless Jar", "Big Year", "Light Sword", "Jingle Bells", "Eternal Candle", "Skull Flower", "Sakura Flower", "Jelly Bunny", "Cupid Charm", "Hanging Star", "Easter Egg", "Spy Agaric", "Homemade Cake", "Snow Globe", "Xmas Stocking", "B-Day Candle", "Candy Cane", "Lush Bouquet", "Top Hat", "Scared Cat", "Spiced Wine", "Evil Eye", "Ionic Dryer", "Ginger Cookie", "Hex Pot", "Stellar Rocket", "Trapped Heart", "Snake Box", "Loot Bag", "Electric Skull", "Love Candle", "Jack-in-the-Box", "Witch Hat", "Love Potion", "Kissed Frog", "Diamond Ring", "Neko Helmet", "Pet Snake", "Jester Hat", "Flying Broom", "Party Sparkler", "Star Notepad", "Voodoo Doll", "Bonded Ring", "Snow Mittens", "Crystal Ball", "Berry Box", "Tama Gadget", "Valentine Box", "Cookie Heart", "Precious Peach", "Bow Tie", "Signet Ring", "Lol Pop", "Santa Hat", "Hypno Lollipop", "Winter Wreath", "Vintage Cigar", "Bunny Muffin", "Mad Pumpkin", "Eternal Rose", "Jolly Chimp", "Input Key", "Desk Calendar", "Swiss Watch", "Sleigh Bell", "Toy Bear", "Sky Stilettos", "Fresh Socks", "Clover Pin", "Instant Ramen", "Mousse Cake", "Spring Basket", "Faith Amulet", "UFC Strike", "Snoop Dogg", "Swag Bag", "Snoop Cigar", "Low Rider", "Westside Sign", "Khabib’s Papakha"
         ];
 
         const inventory = giftNames.map((name, i) => ({
-            id: i, name: name, price: (Math.random() * 15 + 1).toFixed(1), icon: "🎁"
+            id: i, name: name, price: (Math.random() * 15 + 1).toFixed(2), icon: "🎁"
         }));
 
         const selector = document.getElementById('gift-selector');
@@ -180,9 +177,17 @@
             opt.value = name; opt.textContent = name; selector.appendChild(opt);
         });
 
+        function updateBalanceUI() {
+            document.getElementById('user-balance').textContent = userBalance.toFixed(2);
+        }
+
         function renderMarket(filter = "all") {
             const container = document.getElementById('market-page');
-            const filteredItems = filter === "all" ? inventory : inventory.filter(item => item.name === filter);
+            // Фильтруем: только те, что НЕ куплены
+            const filteredItems = inventory.filter(item => {
+                const matchesFilter = (filter === "all" || item.name === filter);
+                return matchesFilter && !purchasedIds.has(item.id);
+            });
             
             container.innerHTML = filteredItems.map(item => {
                 const inCart = cart.some(c => c.id === item.id);
@@ -203,12 +208,12 @@
         }
 
         function addToCart(itemId) {
+            if (purchasedIds.has(itemId)) return;
             const item = inventory.find(i => i.id === itemId);
             const exists = cart.some(c => c.id === itemId);
             
             if (exists) {
-                tg.showAlert(`${item.name} уже в корзине!`);
-                tg.HapticFeedback.notificationOccurred('warning');
+                tg.showAlert(`"${item.name}" уже в корзине!`);
                 return;
             }
 
@@ -221,9 +226,9 @@
         function updateCartUI() {
             const bar = document.getElementById('checkout-bar');
             if (cart.length > 0) {
-                const total = cart.reduce((acc, i) => acc + parseFloat(i.price), 0).toFixed(1);
+                const total = cart.reduce((acc, i) => acc + parseFloat(i.price), 0).toFixed(2);
                 document.getElementById('cart-sum').textContent = `${total} TON`;
-                document.getElementById('cart-count').textContent = `${cart.length} items selected`;
+                document.getElementById('cart-count').textContent = `${cart.length} подарков выбрано`;
                 bar.style.display = 'flex';
             } else { 
                 bar.style.display = 'none'; 
@@ -232,35 +237,64 @@
 
         function buyOne(itemId) {
             const item = inventory.find(i => i.id === itemId);
-            tg.showConfirm(`Buy ${item.name} for ${item.price} TON?`, (ok) => {
-                if(ok) { myGifts.push(item); tg.showAlert("Purchased!"); }
+            const price = parseFloat(item.price);
+
+            tg.showConfirm(`Купить "${item.name}" за ${price} TON?`, (ok) => {
+                if(ok) {
+                    if (userBalance >= price) {
+                        userBalance -= price;
+                        completePurchase([item]);
+                        tg.showAlert("Поздравляем с покупкой!");
+                    } else {
+                        tg.showAlert("Недостаточно баланса!");
+                        tg.HapticFeedback.notificationOccurred('error');
+                    }
+                }
             });
         }
 
         function payCart() {
-            const total = cart.reduce((acc, i) => acc + parseFloat(i.price), 0).toFixed(1);
-            tg.showConfirm(`Pay ${total} TON for ${cart.length} items?`, (ok) => {
+            const total = parseFloat(cart.reduce((acc, i) => acc + parseFloat(i.price), 0).toFixed(2));
+            tg.showConfirm(`Оплатить корзину на сумму ${total} TON?`, (ok) => {
                 if(ok) {
-                    myGifts.push(...cart);
-                    cart = [];
-                    updateCartUI();
-                    renderMarket(document.getElementById('gift-selector').value);
-                    tg.showAlert("All items purchased!");
+                    if (userBalance >= total) {
+                        userBalance -= total;
+                        completePurchase([...cart]);
+                        cart = [];
+                        updateCartUI();
+                        tg.showAlert("Все товары куплены!");
+                    } else {
+                        tg.showAlert("Недостаточно баланса для всей корзины!");
+                        tg.HapticFeedback.notificationOccurred('error');
+                    }
                 }
             });
+        }
+
+        function completePurchase(items) {
+            items.forEach(item => {
+                purchasedIds.add(item.id);
+                myGifts.push(item);
+                // Удаляем из корзины, если он там был
+                cart = cart.filter(c => c.id !== item.id);
+            });
+            updateBalanceUI();
+            updateCartUI();
+            renderMarket(document.getElementById('gift-selector').value);
+            tg.HapticFeedback.notificationOccurred('success');
         }
 
         function renderMyGifts() {
             const container = document.getElementById('gifts-page');
             if (myGifts.length === 0) {
-                container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#888; margin-top:40px;">No gifts yet</p>';
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#888; margin-top:40px;">У вас пока нет подарков</p>';
                 return;
             }
             container.innerHTML = myGifts.map(item => `
                 <div class="item-card">
                     <div class="item-preview">${item.icon}</div>
                     <div class="item-name">${item.name}</div>
-                    <div style="font-size:10px; color:var(--ton-color); font-weight:bold;">OWNED</div>
+                    <div style="font-size:10px; color:var(--ton-color); font-weight:bold;">В КОЛЛЕКЦИИ</div>
                 </div>
             `).join('');
         }
@@ -272,7 +306,6 @@
             cart = []; 
             updateCartUI();
             renderMarket("all"); 
-            tg.HapticFeedback.notificationOccurred('success');
         }
 
         function showPage(pageId) {
@@ -284,14 +317,8 @@
             tg.HapticFeedback.impactOccurred('light');
         }
 
+        updateBalanceUI();
         renderMarket();
-
-        try {
-            new TON_CONNECT_UI.TonConnectUI({
-                manifestUrl: 'https://alexfunnyman.github.io/Aura-Marketplace/tonconnect-manifest.json',
-                buttonRootId: 'ton-connect-button'
-            });
-        } catch (e) {}
     </script>
 </body>
 </html>
