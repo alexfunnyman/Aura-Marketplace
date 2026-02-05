@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aura Market</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root {
             --bg-color: #000000;
@@ -19,13 +20,11 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, sans-serif;
             margin: 0;
-            padding: 0;
-            padding-bottom: 80px; /* Место для меню */
+            padding-bottom: 80px;
         }
 
-        /* ВЕРХНЯЯ ПАНЕЛЬ */
         header {
             display: flex;
             justify-content: space-between;
@@ -36,17 +35,6 @@
             position: sticky;
             top: 0;
             z-index: 100;
-        }
-
-        .balance {
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .balance span {
-            color: var(--ton-color);
-            font-size: 14px;
-            margin-left: 4px;
         }
 
         .header-btns {
@@ -68,17 +56,11 @@
             font-size: 20px;
         }
 
-        .connect-btn {
-            background: var(--text-main);
-            color: black;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 14px;
+        /* Контейнер для кнопки Ton Connect */
+        #ton-connect-button {
+            display: inline-block;
         }
 
-        /* ФИЛЬТРЫ */
         .filters-section {
             padding: 15px;
             display: grid;
@@ -86,7 +68,7 @@
             gap: 10px;
         }
 
-        select {
+        select, .filter-btn {
             background: var(--card-bg);
             border: 1px solid var(--border);
             color: var(--text-main);
@@ -95,14 +77,11 @@
             font-size: 14px;
             outline: none;
             width: 100%;
-            appearance: none;
+            text-align: center;
         }
 
-        .full-width {
-            grid-column: span 2;
-        }
+        .full-width { grid-column: span 2; }
 
-        /* ЛЕНТА ПОДАРКОВ */
         .gift-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -119,156 +98,90 @@
         }
 
         .gift-preview {
-            width: 100%;
-            aspect-ratio: 1/1;
+            width: 100%; aspect-ratio: 1/1;
             background: linear-gradient(45deg, #111, #222);
-            border-radius: 12px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
+            border-radius: 12px; margin-bottom: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 40px;
         }
 
-        .gift-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .gift-meta {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .price-tag {
-            color: var(--ton-color);
-            font-weight: 700;
-            font-size: 15px;
-        }
-
-        /* НИЖНЯЯ НАВИГАЦИЯ */
         nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+            position: fixed; bottom: 0; width: 100%;
             background: rgba(10, 10, 10, 0.95);
             border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0 25px 0;
-            backdrop-filter: blur(15px);
+            display: flex; justify-content: space-around;
+            padding: 10px 0 25px 0; backdrop-filter: blur(15px);
         }
 
         .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 10px;
-            gap: 4px;
+            display: flex; flex-direction: column; align-items: center;
+            color: var(--text-secondary); text-decoration: none; font-size: 10px; gap: 4px;
         }
 
-        .nav-item.active {
-            color: var(--text-main);
-        }
-
-        .nav-icon {
-            font-size: 20px;
-        }
-
+        .nav-item.active { color: var(--text-main); }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="balance">0.00 <span>TON</span></div>
+        <div class="balance" id="user-balance">0.00 <span>TON</span></div>
         <div class="header-btns">
-            <button class="profile-btn" onclick="openProfile()">👤</button>
-            <button class="connect-btn" onclick="connectWallet()">Connect</button>
+            <button class="profile-btn">👤</button>
+            <div id="ton-connect-button"></div>
         </div>
     </header>
 
     <div class="filters-section">
-        <select>
-            <option>Название подарка</option>
-            <option>Red Star</option>
-            <option>Blue Diamond</option>
-        </select>
-        <select>
-            <option>Модель</option>
-            <option>Classic</option>
-            <option>Premium</option>
-        </select>
-        
-        <button style="background:var(--card-bg); color:white; border:1px solid var(--border); padding:12px; border-radius:12px;">Каталог фонов</button>
-        <button style="background:var(--card-bg); color:white; border:1px solid var(--border); padding:12px; border-radius:12px;">Узоры</button>
-        
+        <select><option>Название подарка</option></select>
+        <select><option>Модель</option></select>
+        <button class="filter-btn">Каталог фонов</button>
+        <button class="filter-btn">Узоры</button>
         <select class="full-width">
             <option>Сортировка: недавно добавленные</option>
             <option>Цена: по убыванию</option>
-            <option>Цена: по возрастанию</option>
-            <option>Номер: по убыванию</option>
-            <option>Номер: по возрастанию</option>
         </select>
     </div>
 
     <div class="gift-grid">
         <div class="gift-item">
             <div class="gift-preview">🎁</div>
-            <div class="gift-title">Red Star</div>
-            <div class="gift-meta">#442 / 5000</div>
-            <div class="price-tag">12.5 TON</div>
+            <div class="gift-title">Aura Gift</div>
+            <div class="price-tag" style="color:var(--ton-color)">5 TON</div>
         </div>
         <div class="gift-item">
-            <div class="gift-preview">💎</div>
-            <div class="gift-title">Magic Gem</div>
-            <div class="gift-meta">#12 / 100</div>
-            <div class="price-tag">88 TON</div>
+            <div class="gift-preview">✨</div>
+            <div class="gift-title">Rare Aura</div>
+            <div class="price-tag" style="color:var(--ton-color)">15 TON</div>
         </div>
     </div>
 
     <nav>
-        <a href="#" class="nav-item active">
-            <span class="nav-icon">🏪</span>
-            <span>Market</span>
-        </a>
-        <a href="#" class="nav-item">
-            <span class="nav-icon">🔨</span>
-            <span>Auctions</span>
-        </a>
-        <a href="#" class="nav-item">
-            <span class="nav-icon">🎁</span>
-            <span>My Gifts</span>
-        </a>
-        <a href="#" class="nav-item">
-            <span class="nav-icon">📊</span>
-            <span>Activity</span>
-        </a>
+        <a href="#" class="nav-item active"><span>🏪</span><span>Market</span></a>
+        <a href="#" class="nav-item"><span>🔨</span><span>Auctions</span></a>
+        <a href="#" class="nav-item"><span>🎁</span><span>My Gifts</span></a>
+        <a href="#" class="nav-item"><span>📊</span><span>Activity</span></a>
     </nav>
 
     <script>
+        // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.headerColor = '#000000';
 
-        function openProfile() {
-            tg.showAlert("Переход в профиль Aura...");
-        }
+        // Инициализация TonConnect UI
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://alexfunnyman.github.io/Aura-Marketplace/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect-button'
+        });
 
-        function connectWallet() {
-            tg.showPopup({
-                title: 'Aura Wallet',
-                message: 'Выберите кошелек для подключения',
-                buttons: [
-                    {id: 'btn1', type: 'default', text: 'Tonkeeper'},
-                    {id: 'btn2', type: 'default', text: 'MyTonWallet'},
-                    {type: 'cancel', text: 'Отмена'}
-                ]
-            });
-        }
+        // Следим за состоянием кошелька
+        tonConnectUI.onStatusChange(wallet => {
+            if (wallet) {
+                console.log('Кошелек подключен:', wallet.account.address);
+                // Здесь в будущем мы запросим баланс через API
+            } else {
+                console.log('Кошелек отключен');
+            }
+        });
     </script>
 </body>
 </html>
