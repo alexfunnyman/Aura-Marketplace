@@ -25,7 +25,7 @@
             overflow-x: hidden;
         }
 
-        /* Шапка с огромным балансом */
+        /* Шапка */
         header {
             display: flex;
             justify-content: space-between;
@@ -39,19 +39,22 @@
             border-bottom: 1px solid var(--border);
         }
 
+        /* Огромный баланс */
         .balance {
-            font-size: 34px; /* Огромные цифры */
+            font-size: 34px; 
             font-weight: 900;
             letter-spacing: -1.5px;
             display: flex;
             align-items: baseline;
         }
 
+        /* Крупная надпись TON */
         .balance span {
-            font-size: 18px; /* Крупная надпись TON */
+            font-size: 18px; 
             color: var(--text-secondary);
             font-weight: 700;
             margin-left: 6px;
+            text-transform: uppercase;
         }
 
         .header-btns {
@@ -129,7 +132,7 @@
 <body>
 
     <header>
-        <div class="balance">1.23<span>AURA</span></div>
+        <div class="balance">1.23<span>TON</span></div>
         <div class="header-btns">
             <div id="ton-connect-button"></div>
         </div>
@@ -157,19 +160,17 @@
     </nav>
 
     <script>
-        // Инициализация Telegram
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
 
-        // Безопасная инициализация Ton Connect
         try {
             const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
                 manifestUrl: 'https://alexfunnyman.github.io/Aura-Marketplace/tonconnect-manifest.json',
                 buttonRootId: 'ton-connect-button'
             });
         } catch (e) {
-            console.error("Ошибка TonConnect:", e);
+            console.error("TonConnect Error");
         }
 
         function buy() {
