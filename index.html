@@ -21,7 +21,7 @@
             color: var(--text-main);
             font-family: -apple-system, system-ui, sans-serif;
             margin: 0;
-            padding-bottom: 100px;
+            padding-bottom: 120px;
             overflow-x: hidden;
         }
 
@@ -66,8 +66,28 @@
 
         #ton-connect-button { scale: 0.9; transform-origin: right; }
 
+        /* Блок фильтров */
+        .filters-container {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .filter-select, .filter-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 12px;
+            border-radius: 14px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .full-width { grid-column: span 2; }
+
         /* Контентные секции */
-        .page-content { display: none; padding: 20px 15px; animation: fadeIn 0.3s ease; }
+        .page-content { display: none; padding: 0 15px; animation: fadeIn 0.3s ease; }
         .page-content.active { display: grid; }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -78,30 +98,28 @@
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 24px;
-            padding: 16px;
+            padding: 12px;
             text-align: center;
+            margin-bottom: 5px;
         }
 
         .item-preview {
-            font-size: 40px; margin-bottom: 10px;
-            background: #1a1a1a; aspect-ratio: 1/1;
+            font-size: 45px; margin-bottom: 12px;
+            background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+            aspect-ratio: 1/1;
             display: flex; align-items: center; justify-content: center;
-            border-radius: 16px;
+            border-radius: 20px;
+            border: 1px solid #222;
         }
+
+        .item-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+        .item-price { color: var(--ton-color); font-weight: 800; font-size: 15px; }
 
         .btn-main {
             margin-top: 12px; width: 100%; padding: 10px;
             border-radius: 12px; border: none;
             background: #fff; color: #000;
-            font-weight: 800; font-size: 13px;
-        }
-
-        /* Список Activity */
-        .activity-item {
-            display: flex; align-items: center; gap: 12px;
-            background: var(--card-bg); padding: 12px;
-            border-radius: 16px; margin-bottom: 8px;
-            border: 1px solid var(--border);
+            font-weight: 800; font-size: 12px;
         }
 
         nav {
@@ -136,62 +154,30 @@
         </div>
     </header>
 
-    <div id="market-page" class="page-content active grid-2">
-        <div class="item-card">
-            <div class="item-preview">💎</div>
-            <div style="font-weight:600">Aura Crystal</div>
-            <div style="color:var(--ton-color); font-weight:800">5 TON</div>
-            <button class="btn-main" onclick="buy('Crystal')">Купить</button>
-        </div>
-        <div class="item-card">
-            <div class="item-preview">🎁</div>
-            <div style="font-weight:600">Aura Box</div>
-            <div style="color:var(--ton-color); font-weight:800">10 TON</div>
-            <button class="btn-main" onclick="buy('Box')">Купить</button>
-        </div>
+    <div id="market-filters" class="filters-container">
+        <select class="filter-select"><option>Название</option></select>
+        <select class="filter-select"><option>Модель</option></select>
+        <button class="filter-btn">Каталог фонов</button>
+        <button class="filter-btn">Узоры</button>
+        <select class="filter-select full-width"><option>Сортировка: недавно добавленные</option></select>
     </div>
+
+    <div id="market-page" class="page-content active grid-2">
+        </div>
 
     <div id="auctions-page" class="page-content grid-2">
-        <div class="item-card">
-            <div class="item-preview">⚡️</div>
-            <div style="font-weight:600">Rare Aura</div>
-            <div style="color:#ffcc00; font-weight:800">50 TON</div>
-            <button class="btn-main" style="background:#ffcc00" onclick="bid()">Ставка</button>
+        <div class="item-card" style="grid-column: span 2;">
+            <p style="color:#888;">Активных аукционов пока нет</p>
         </div>
     </div>
-
     <div id="gifts-page" class="page-content">
-        <div style="text-align:center; padding: 40px 0;">
-            <div style="font-size:50px; opacity:0.3;">🎁</div>
-            <h3 style="margin:10px 0 5px 0;">Пока пусто</h3>
-            <p style="color:var(--text-secondary); font-size:14px;">Купите свой первый подарок в Маркете</p>
-            <button class="btn-main" style="width:auto; padding:10px 30px;" onclick="showPage('market')">В Маркет</button>
-        </div>
+        <p style="text-align:center; padding-top:50px; color:#888;">У вас пока нет подарков</p>
     </div>
-
     <div id="activity-page" class="page-content">
-        <div class="activity-item">
-            <div style="font-size:24px;">✅</div>
-            <div>
-                <div style="font-weight:600; font-size:14px;">Покупка Aura Box</div>
-                <div style="font-size:12px; color:var(--text-secondary);">2 минуты назад</div>
-            </div>
-        </div>
-        <div class="activity-item">
-            <div style="font-size:24px;">💰</div>
-            <div>
-                <div style="font-weight:600; font-size:14px;">Ставка перебита</div>
-                <div style="font-size:12px; color:var(--text-secondary);">15 минут назад</div>
-            </div>
-        </div>
+        <p style="text-align:center; padding-top:50px; color:#888;">История пуста</p>
     </div>
-
-    <div id="profile-page" class="page-content" style="text-align:center;">
-        <h2>Мой Аккаунт</h2>
-        <div class="item-card" style="margin-top:20px;">
-            <p>Статус: Новичок</p>
-            <p>ID: 48151623</p>
-        </div>
+    <div id="profile-page" class="page-content">
+        <h2 style="text-align:center;">Профиль</h2>
     </div>
 
     <nav>
@@ -206,19 +192,46 @@
         tg.ready();
         tg.expand();
 
+        // Данные для ленты
+        const inventory = [
+            { name: "Aura Crystal", price: 5, icon: "💎" },
+            { name: "Aura Box", price: 10, icon: "🎁" },
+            { name: "Rare Pattern", price: 15, icon: "✨" },
+            { name: "Golden Shell", price: 25, icon: "🐚" },
+            { name: "Neon Frame", price: 8, icon: "🖼" },
+            { name: "Dark Energy", price: 12, icon: "🌑" },
+            { name: "Ether Orb", price: 20, icon: "🔮" },
+            { name: "Aura Ticket", price: 3, icon: "🎟" }
+        ];
+
+        function renderMarket() {
+            const container = document.getElementById('market-page');
+            container.innerHTML = inventory.map(item => `
+                <div class="item-card">
+                    <div class="item-preview">${item.icon}</div>
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-price">${item.price} TON</div>
+                    <button class="btn-main" onclick="buy('${item.name}')">Купить</button>
+                </div>
+            `).join('');
+        }
+
         function showPage(pageId) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             
-            document.getElementById(pageId + '-page').classList.add('active');
-            const navBtn = document.getElementById('nav-' + pageId);
-            if(navBtn) navBtn.classList.add('active');
+            // Прячем фильтры, если это не маркет
+            document.getElementById('market-filters').style.display = (pageId === 'market') ? 'grid' : 'none';
             
+            document.getElementById(pageId + '-page').classList.add('active');
+            document.getElementById('nav-' + pageId).classList.add('active');
             tg.HapticFeedback.impactOccurred('light');
         }
 
         function buy(name) { tg.showConfirm("Купить " + name + "?"); }
-        function bid() { tg.showAlert("Ставка принята!"); }
+
+        // Запуск
+        renderMarket();
 
         try {
             const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
@@ -229,6 +242,3 @@
     </script>
 </body>
 </html>
-
-
-
