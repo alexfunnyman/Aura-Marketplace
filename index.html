@@ -22,7 +22,7 @@
             color: var(--text-main);
             font-family: -apple-system, system-ui, sans-serif;
             margin: 0;
-            padding-bottom: 140px; /* Increased for the cart bar */
+            padding-bottom: 150px; /* Запас под корзину и меню */
             overflow-x: hidden;
         }
 
@@ -33,9 +33,17 @@
             border-bottom: 1px solid var(--border);
         }
 
+        .left-side { display: flex; align-items: center; gap: 12px; }
         .balance { font-size: 34px; font-weight: 900; letter-spacing: -1.5px; display: flex; align-items: baseline; }
         .balance span { font-size: 18px; color: var(--text-secondary); font-weight: 700; margin-left: 6px; }
+        
+        .profile-btn {
+            background: var(--card-bg); border: 1px solid var(--border);
+            width: 42px; height: 42px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 20px;
+        }
 
+        /* FILTERS */
         .filters-container { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
         .filter-row { display: flex; gap: 10px; width: 100%; }
         .filter-select, .filter-btn {
@@ -47,13 +55,13 @@
         .clear-filters-btn {
             background: var(--card-bg); border: 1px solid var(--border); color: var(--danger);
             width: 46px; height: 46px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
         }
 
+        /* GRID */
         .page-content { display: none; padding: 0 15px; animation: fadeIn 0.3s ease; }
         .page-content.active { display: grid; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         .grid-2 { grid-template-columns: 1fr 1fr; gap: 12px; }
 
         .item-card {
@@ -74,14 +82,14 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             width: 32px; height: 32px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 16px; cursor: pointer; z-index: 5; transition: 0.2s;
+            font-size: 16px; cursor: pointer; z-index: 5;
         }
-        .cart-mini-icon:active { transform: scale(0.9); background: var(--ton-color); }
 
         .item-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; height: 34px; display: flex; align-items: center; justify-content: center; }
         .item-price { color: var(--ton-color); font-weight: 800; font-size: 15px; }
+        .btn-main { margin-top: 12px; width: 100%; padding: 10px; border-radius: 12px; border: none; background: #fff; color: #000; font-weight: 800; font-size: 12px; }
 
-        /* FLOATING CART BAR */
+        /* FLOATING CHECKOUT BAR */
         #checkout-bar {
             position: fixed; bottom: 85px; left: 15px; right: 15px;
             background: #1c1c1e; border: 1px solid var(--border);
@@ -91,28 +99,17 @@
             animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .checkout-info { display: flex; flex-direction: column; }
         .checkout-total { font-weight: 800; font-size: 18px; color: var(--ton-color); }
-        .checkout-count { font-size: 12px; color: var(--text-secondary); }
+        .checkout-count { font-size: 12px; color: var(--text-secondary); display: block; }
+        .btn-checkout { background: #fff; color: #000; border: none; padding: 8px 20px; border-radius: 10px; font-weight: 800; }
 
-        .btn-checkout {
-            background: #fff; color: #000; border: none;
-            padding: 8px 16px; border-radius: 10px; font-weight: 800;
-            font-size: 14px; cursor: pointer;
-        }
-
+        /* NAV */
         nav {
-            position: fixed; bottom: 0; width: 100%;
-            background: rgba(10,10,10,0.95); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around;
+            position: fixed; bottom: 0; width: 100%; background: rgba(10,10,10,0.95);
+            border-top: 1px solid var(--border); display: flex; justify-content: space-around;
             padding: 10px 0 25px 0; backdrop-filter: blur(15px); z-index: 1000;
         }
-
-        .nav-item {
-            color: var(--text-secondary); text-decoration: none; font-size: 10px;
-            display: flex; flex-direction: column; align-items: center; gap: 4px; width: 25%;
-        }
+        .nav-item { color: var(--text-secondary); text-decoration: none; font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 25%; }
         .nav-item.active { color: #fff; }
         .nav-item span:first-child { font-size: 22px; }
     </style>
@@ -137,14 +134,17 @@
             <button class="filter-btn">Background</button>
             <button class="filter-btn">Symbol</button>
         </div>
+        <select class="filter-select"><option>Sort by: Recently added</option></select>
     </div>
 
     <div id="market-page" class="page-content active grid-2"></div>
     <div id="auctions-page" class="page-content grid-2"></div>
-    <div id="gifts-page" class="page-content"></div>
+    <div id="gifts-page" class="page-content grid-2"></div>
+    <div id="activity-page" class="page-content"></div>
+    <div id="profile-page" class="page-content"></div>
 
     <div id="checkout-bar">
-        <div class="checkout-info">
+        <div>
             <span class="checkout-total" id="cart-sum">0.0 TON</span>
             <span class="checkout-count" id="cart-count">0 items selected</span>
         </div>
@@ -163,50 +163,23 @@
         tg.ready(); tg.expand();
 
         let cart = [];
-        const giftNames = ["Heart Locket", "Plush Pepe", "Heroic Helmet", "Mighty Arm", "Ion Gem", "Durov's Cap", "Astral Shard", "Artisan Brick"];
+        let myGifts = [];
+
+        // Полный список названий
+        const giftNames = [
+            "Heart Locket", "Plush Pepe", "Heroic Helmet", "Mighty Arm", "Ion Gem", "Durov's Cap", "Nail Bracelet", "Perfume Bottle", "Magic Potion", "Mini Oscar", "Astral Shard", "Artisan Brick", "Gem Signet", "Sharp Tongue", "Moon Pendant", "Lunar Snake", "Holiday Drink", "Record Player", "Joyful Bundle", "Restless Jar", "Big Year", "Light Sword", "Jingle Bells", "Eternal Candle", "Skull Flower", "Sakura Flower", "Jelly Bunny", "Cupid Charm", "Hanging Star", "Easter Egg", "Spy Agaric", "Homemade Cake", "Snow Globe", "Xmas Stocking", "B-Day Candle", "Candy Cane", "Lush Bouquet", "Top Hat", "Scared Cat", "Spiced Wine", "Evil Eye", "Ionic Dryer", "Ginger Cookie", "Hex Pot", "Stellar Rocket", "Trapped Heart", "Snake Box", "Loot Bag", "Electric Skull", "Love Candle", "Jack-in-the-Box", "Witch Hat", "Love Potion", "Kissed Frog", "Diamond Ring", "Neko Helmet", "Pet Snake", "Jester Hat", "Flying Broom", "Party Sparkler", "Star Notepad", "Voodoo Doll", "Bonded Ring", "Snow Mittens", "Crystal Ball", "Berry Box", "Tama Gadget", "Valentine Box", "Cookie Heart", "Precious Peach", "Bow Tie", "Signet Ring", "Lol Pop", "Santa Hat", "Hypno Lollipop", "Winter Wreath", "Vintage Cigar", "Bunny Muffin", "Mad Pumpkin", "Eternal Rose", "Jolly Chimp", "Input Key", "Desk Calendar", "Swiss Watch", "Sleigh Bell", "Toy Bear", "Sky Stilettos", "Fresh Socks", "Clover Pin", "Instant Ramen", "Mousse Cake", "Spring Basket", "Faith Amulet", "UFC Strike", "Snoop Dogg", "Swag Bag", "Snoop Cigar", "Low Rider", "Westside Sign", "Khabib’s Papakha"
+        ];
 
         const inventory = giftNames.map((name, i) => ({
-            id: i, name: name, price: (Math.random() * 10 + 1).toFixed(1), icon: "🎁"
+            id: i, name: name, price: (Math.random() * 15 + 1).toFixed(1), icon: "🎁"
         }));
 
+        // Заполнение фильтра
         const selector = document.getElementById('gift-selector');
         giftNames.forEach(name => {
             const opt = document.createElement('option');
             opt.value = name; opt.textContent = name; selector.appendChild(opt);
         });
-
-        function addToCart(itemId) {
-            const item = inventory.find(i => i.id === itemId);
-            cart.push(item);
-            updateCartUI();
-            tg.HapticFeedback.impactOccurred('medium');
-        }
-
-        function updateCartUI() {
-            const bar = document.getElementById('checkout-bar');
-            const sumEl = document.getElementById('cart-sum');
-            const countEl = document.getElementById('cart-count');
-
-            if (cart.length > 0) {
-                const total = cart.reduce((acc, item) => acc + parseFloat(item.price), 0).toFixed(1);
-                sumEl.textContent = `${total} TON`;
-                countEl.textContent = `${cart.length} items in cart`;
-                bar.style.display = 'flex';
-            } else {
-                bar.style.display = 'none';
-            }
-        }
-
-        function payCart() {
-            const total = cart.reduce((acc, item) => acc + parseFloat(item.price), 0).toFixed(1);
-            tg.showConfirm(`Pay ${total} TON for ${cart.length} items?`, (confirmed) => {
-                if (confirmed) {
-                    tg.showAlert("Purchase successful!");
-                    cart = [];
-                    updateCartUI();
-                }
-            });
-        }
 
         function renderMarket(filter = "all") {
             const container = document.getElementById('market-page');
@@ -219,7 +192,58 @@
                     </div>
                     <div class="item-name">${item.name}</div>
                     <div class="item-price">${item.price} TON</div>
-                    <button class="btn-main" onclick="tg.showConfirm('Buy ${item.name}?')">Buy</button>
+                    <button class="btn-main" onclick="buyOne(${item.id})">Buy</button>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(itemId) {
+            const item = inventory.find(i => i.id === itemId);
+            cart.push(item);
+            updateCartUI();
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        function updateCartUI() {
+            const bar = document.getElementById('checkout-bar');
+            if (cart.length > 0) {
+                const total = cart.reduce((acc, i) => acc + parseFloat(i.price), 0).toFixed(1);
+                document.getElementById('cart-sum').textContent = `${total} TON`;
+                document.getElementById('cart-count').textContent = `${cart.length} items selected`;
+                bar.style.display = 'flex';
+            } else { bar.style.display = 'none'; }
+        }
+
+        function buyOne(itemId) {
+            const item = inventory.find(i => i.id === itemId);
+            tg.showConfirm(`Buy ${item.name} for ${item.price} TON?`, (ok) => {
+                if(ok) { myGifts.push(item); tg.showAlert("Purchased!"); }
+            });
+        }
+
+        function payCart() {
+            const total = cart.reduce((acc, i) => acc + parseFloat(i.price), 0).toFixed(1);
+            tg.showConfirm(`Pay ${total} TON for ${cart.length} items?`, (ok) => {
+                if(ok) {
+                    myGifts.push(...cart);
+                    cart = [];
+                    updateCartUI();
+                    tg.showAlert("All items purchased!");
+                }
+            });
+        }
+
+        function renderMyGifts() {
+            const container = document.getElementById('gifts-page');
+            if (myGifts.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#888; margin-top:40px;">No gifts yet</p>';
+                return;
+            }
+            container.innerHTML = myGifts.map(item => `
+                <div class="item-card">
+                    <div class="item-preview">${item.icon}</div>
+                    <div class="item-name">${item.name}</div>
+                    <div style="font-size:10px; color:var(--ton-color)">OWNED</div>
                 </div>
             `).join('');
         }
@@ -232,9 +256,18 @@
             document.getElementById(pageId + '-page').classList.add('active');
             document.getElementById('nav-' + pageId).classList.add('active');
             document.getElementById('market-filters').style.display = (pageId === 'market') ? 'flex' : 'none';
+            if(pageId === 'gifts') renderMyGifts();
+            tg.HapticFeedback.impactOccurred('light');
         }
 
         renderMarket();
+
+        try {
+            new TON_CONNECT_UI.TonConnectUI({
+                manifestUrl: 'https://alexfunnyman.github.io/Aura-Marketplace/tonconnect-manifest.json',
+                buttonRootId: 'ton-connect-button'
+            });
+        } catch (e) {}
     </script>
 </body>
 </html>
