@@ -67,8 +67,12 @@
         #ton-connect-button { scale: 0.9; transform-origin: right; }
 
         /* Контентные секции */
-        .page-content { display: none; padding: 20px 15px; }
-        .page-content.active { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .page-content { display: none; padding: 20px 15px; animation: fadeIn 0.3s ease; }
+        .page-content.active { display: grid; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .grid-2 { grid-template-columns: 1fr 1fr; gap: 12px; }
 
         .item-card {
             background: var(--card-bg);
@@ -92,30 +96,32 @@
             font-weight: 800; font-size: 13px;
         }
 
-        .badge-auction {
-            background: #ff3b30; color: white;
-            font-size: 10px; padding: 2px 8px;
-            border-radius: 10px; margin-bottom: 5px;
-            display: inline-block;
+        /* Список Activity */
+        .activity-item {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--card-bg); padding: 12px;
+            border-radius: 16px; margin-bottom: 8px;
+            border: 1px solid var(--border);
         }
 
         nav {
             position: fixed; bottom: 0; width: 100%;
-            background: rgba(10,10,10,0.9);
+            background: rgba(10,10,10,0.95);
             border-top: 1px solid var(--border);
             display: flex; justify-content: space-around;
-            padding: 10px 0 25px 0; backdrop-filter: blur(10px);
+            padding: 10px 0 25px 0; backdrop-filter: blur(15px);
             z-index: 1000;
         }
 
         .nav-item {
             color: var(--text-secondary);
-            text-decoration: none; font-size: 11px;
+            text-decoration: none; font-size: 10px;
             display: flex; flex-direction: column;
-            align-items: center; gap: 4px;
+            align-items: center; gap: 4px; width: 25%;
         }
         
         .nav-item.active { color: #fff; }
+        .nav-item span:first-child { font-size: 22px; }
     </style>
 </head>
 <body>
@@ -130,7 +136,7 @@
         </div>
     </header>
 
-    <div id="market-page" class="page-content active">
+    <div id="market-page" class="page-content active grid-2">
         <div class="item-card">
             <div class="item-preview">💎</div>
             <div style="font-weight:600">Aura Crystal</div>
@@ -145,32 +151,54 @@
         </div>
     </div>
 
-    <div id="auctions-page" class="page-content">
+    <div id="auctions-page" class="page-content grid-2">
         <div class="item-card">
-            <span class="badge-auction">LIVE</span>
             <div class="item-preview">⚡️</div>
-            <div style="font-weight:600">Rare Aura #01</div>
-            <div style="color:#ffcc00; font-weight:800">Min: 50 TON</div>
-            <button class="btn-main" style="background:#ffcc00" onclick="bid()">Ставка</button>
-        </div>
-        <div class="item-card">
-            <span class="badge-auction">LIVE</span>
-            <div class="item-preview">🔥</div>
-            <div style="font-weight:600">Legendary User</div>
-            <div style="color:#ffcc00; font-weight:800">Min: 150 TON</div>
+            <div style="font-weight:600">Rare Aura</div>
+            <div style="color:#ffcc00; font-weight:800">50 TON</div>
             <button class="btn-main" style="background:#ffcc00" onclick="bid()">Ставка</button>
         </div>
     </div>
 
-    <div id="profile-page" class="page-content" style="grid-template-columns: 1fr; text-align: center;">
-        <h2>Твой профиль</h2>
-        <p style="color:#888">Здесь будет список твоих подарков и история покупок.</p>
+    <div id="gifts-page" class="page-content">
+        <div style="text-align:center; padding: 40px 0;">
+            <div style="font-size:50px; opacity:0.3;">🎁</div>
+            <h3 style="margin:10px 0 5px 0;">Пока пусто</h3>
+            <p style="color:var(--text-secondary); font-size:14px;">Купите свой первый подарок в Маркете</p>
+            <button class="btn-main" style="width:auto; padding:10px 30px;" onclick="showPage('market')">В Маркет</button>
+        </div>
+    </div>
+
+    <div id="activity-page" class="page-content">
+        <div class="activity-item">
+            <div style="font-size:24px;">✅</div>
+            <div>
+                <div style="font-weight:600; font-size:14px;">Покупка Aura Box</div>
+                <div style="font-size:12px; color:var(--text-secondary);">2 минуты назад</div>
+            </div>
+        </div>
+        <div class="activity-item">
+            <div style="font-size:24px;">💰</div>
+            <div>
+                <div style="font-weight:600; font-size:14px;">Ставка перебита</div>
+                <div style="font-size:12px; color:var(--text-secondary);">15 минут назад</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="profile-page" class="page-content" style="text-align:center;">
+        <h2>Мой Аккаунт</h2>
+        <div class="item-card" style="margin-top:20px;">
+            <p>Статус: Новичок</p>
+            <p>ID: 48151623</p>
+        </div>
     </div>
 
     <nav>
         <a href="javascript:void(0)" class="nav-item active" id="nav-market" onclick="showPage('market')"><span>🏪</span>Market</a>
         <a href="javascript:void(0)" class="nav-item" id="nav-auctions" onclick="showPage('auctions')"><span>🔨</span>Auctions</a>
-        <a href="javascript:void(0)" class="nav-item" id="nav-profile" onclick="showPage('profile')"><span>👤</span>Profile</a>
+        <a href="javascript:void(0)" class="nav-item" id="nav-gifts" onclick="showPage('gifts')"><span>🎁</span>My Gifts</a>
+        <a href="javascript:void(0)" class="nav-item" id="nav-activity" onclick="showPage('activity')"><span>📊</span>Activity</a>
     </nav>
 
     <script>
@@ -178,23 +206,19 @@
         tg.ready();
         tg.expand();
 
-        // Функция переключения страниц
         function showPage(pageId) {
-            // Скрываем все страницы
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-            // Деактивируем все пункты меню
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             
-            // Показываем нужную
             document.getElementById(pageId + '-page').classList.add('active');
-            document.getElementById('nav-' + pageId).classList.add('active');
+            const navBtn = document.getElementById('nav-' + pageId);
+            if(navBtn) navBtn.classList.add('active');
             
-            // Легкая вибрация при переключении
             tg.HapticFeedback.impactOccurred('light');
         }
 
         function buy(name) { tg.showConfirm("Купить " + name + "?"); }
-        function bid() { tg.showAlert("Ваша ставка принята!"); }
+        function bid() { tg.showAlert("Ставка принята!"); }
 
         try {
             const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
