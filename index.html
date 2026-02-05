@@ -98,7 +98,6 @@
         }
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .checkout-total { font-weight: 800; font-size: 18px; color: var(--ton-color); }
-        .checkout-count { font-size: 12px; color: var(--text-secondary); display: block; }
         .btn-checkout { background: #fff; color: #000; border: none; padding: 8px 20px; border-radius: 10px; font-weight: 800; cursor: pointer; }
 
         nav {
@@ -115,7 +114,7 @@
 
     <header>
         <div class="left-side">
-            <div class="balance"><span id="user-balance">100.00</span><span>TON</span></div>
+            <div class="balance"><span id="user-balance">55.60</span><span>TON</span></div>
             <div class="profile-btn" onclick="showPage('profile')">👤</div>
         </div>
         <div id="ton-connect-button"></div>
@@ -142,7 +141,7 @@
     <div id="checkout-bar">
         <div>
             <span class="checkout-total" id="cart-sum">0.0 TON</span>
-            <span class="checkout-count" id="cart-count">0 items selected</span>
+            <span style="font-size: 12px; color: #888; display: block;" id="cart-count">0 items selected</span>
         </div>
         <button class="btn-checkout" onclick="payCart()">Buy now</button>
     </div>
@@ -158,10 +157,11 @@
         const tg = window.Telegram.WebApp;
         tg.ready(); tg.expand();
 
-        let userBalance = 100.00;
+        // Установлено 55.60 TON
+        let userBalance = 55.60;
         let cart = [];
         let myGifts = [];
-        let purchasedIds = new Set(); // ID купленных товаров
+        let purchasedIds = new Set();
 
         const giftNames = [
             "Heart Locket", "Plush Pepe", "Heroic Helmet", "Mighty Arm", "Ion Gem", "Durov's Cap", "Nail Bracelet", "Perfume Bottle", "Magic Potion", "Mini Oscar", "Astral Shard", "Artisan Brick", "Gem Signet", "Sharp Tongue", "Moon Pendant", "Lunar Snake", "Holiday Drink", "Record Player", "Joyful Bundle", "Restless Jar", "Big Year", "Light Sword", "Jingle Bells", "Eternal Candle", "Skull Flower", "Sakura Flower", "Jelly Bunny", "Cupid Charm", "Hanging Star", "Easter Egg", "Spy Agaric", "Homemade Cake", "Snow Globe", "Xmas Stocking", "B-Day Candle", "Candy Cane", "Lush Bouquet", "Top Hat", "Scared Cat", "Spiced Wine", "Evil Eye", "Ionic Dryer", "Ginger Cookie", "Hex Pot", "Stellar Rocket", "Trapped Heart", "Snake Box", "Loot Bag", "Electric Skull", "Love Candle", "Jack-in-the-Box", "Witch Hat", "Love Potion", "Kissed Frog", "Diamond Ring", "Neko Helmet", "Pet Snake", "Jester Hat", "Flying Broom", "Party Sparkler", "Star Notepad", "Voodoo Doll", "Bonded Ring", "Snow Mittens", "Crystal Ball", "Berry Box", "Tama Gadget", "Valentine Box", "Cookie Heart", "Precious Peach", "Bow Tie", "Signet Ring", "Lol Pop", "Santa Hat", "Hypno Lollipop", "Winter Wreath", "Vintage Cigar", "Bunny Muffin", "Mad Pumpkin", "Eternal Rose", "Jolly Chimp", "Input Key", "Desk Calendar", "Swiss Watch", "Sleigh Bell", "Toy Bear", "Sky Stilettos", "Fresh Socks", "Clover Pin", "Instant Ramen", "Mousse Cake", "Spring Basket", "Faith Amulet", "UFC Strike", "Snoop Dogg", "Swag Bag", "Snoop Cigar", "Low Rider", "Westside Sign", "Khabib’s Papakha"
@@ -183,7 +183,6 @@
 
         function renderMarket(filter = "all") {
             const container = document.getElementById('market-page');
-            // Фильтруем: только те, что НЕ куплены
             const filteredItems = inventory.filter(item => {
                 const matchesFilter = (filter === "all" || item.name === filter);
                 return matchesFilter && !purchasedIds.has(item.id);
@@ -210,13 +209,10 @@
         function addToCart(itemId) {
             if (purchasedIds.has(itemId)) return;
             const item = inventory.find(i => i.id === itemId);
-            const exists = cart.some(c => c.id === itemId);
-            
-            if (exists) {
+            if (cart.some(c => c.id === itemId)) {
                 tg.showAlert(`"${item.name}" уже в корзине!`);
                 return;
             }
-
             cart.push(item);
             updateCartUI();
             renderMarket(document.getElementById('gift-selector').value);
@@ -230,15 +226,12 @@
                 document.getElementById('cart-sum').textContent = `${total} TON`;
                 document.getElementById('cart-count').textContent = `${cart.length} подарков выбрано`;
                 bar.style.display = 'flex';
-            } else { 
-                bar.style.display = 'none'; 
-            }
+            } else { bar.style.display = 'none'; }
         }
 
         function buyOne(itemId) {
             const item = inventory.find(i => i.id === itemId);
             const price = parseFloat(item.price);
-
             tg.showConfirm(`Купить "${item.name}" за ${price} TON?`, (ok) => {
                 if(ok) {
                     if (userBalance >= price) {
@@ -275,7 +268,6 @@
             items.forEach(item => {
                 purchasedIds.add(item.id);
                 myGifts.push(item);
-                // Удаляем из корзины, если он там был
                 cart = cart.filter(c => c.id !== item.id);
             });
             updateBalanceUI();
@@ -300,12 +292,9 @@
         }
 
         function filterGifts() { renderMarket(document.getElementById('gift-selector').value); }
-        
         function resetFilters() { 
             document.getElementById('gift-selector').value = "all"; 
-            cart = []; 
-            updateCartUI();
-            renderMarket("all"); 
+            cart = []; updateCartUI(); renderMarket("all"); 
         }
 
         function showPage(pageId) {
