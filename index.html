@@ -14,6 +14,7 @@
             --text-secondary: #888888;
             --ton-color: #0088CC;
             --border: #222222;
+            --danger: #ff3b30;
         }
 
         body {
@@ -71,6 +72,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
+            align-items: center;
         }
 
         .filter-select, .filter-btn {
@@ -82,6 +84,28 @@
             font-size: 13px;
             outline: none;
             appearance: none;
+            text-align: center;
+        }
+
+        /* Кнопка удаления фильтров */
+        .clear-filters-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--danger);
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .clear-filters-btn:active {
+            transform: scale(0.9);
+            background: rgba(255, 59, 48, 0.1);
         }
 
         .full-width { grid-column: span 2; }
@@ -154,23 +178,26 @@
     </header>
 
     <div id="market-filters" class="filters-container">
-        <select class="filter-select" id="gift-selector" onchange="filterGifts()">
-            <option value="all">Все подарки</option>
-            <option value="Rare Bird">Rare Bird</option>
-            <option value="Victory Medal">Victory Medal</option>
-            <option value="Artisan Brick">Artisan Brick</option>
-            <option value="Astral Shard">Astral Shard</option>
-            <option value="B-Day Candle">B-Day Candle</option>
-            <option value="Berry Box">Berry Box</option>
-            <option value="Big Year">Big Year</option>
-            <option value="Bling Binky">Bling Binky</option>
-            <option value="Bonded Ring">Bonded Ring</option>
-            <option value="Bow Tie">Bow Tie</option>
-            <option value="Bunny Muffin">Bunny Muffin</option>
-            <option value="Heart Locket">Heart Locket</option>
-            <option value="Plush Pepe">Plush Pepe</option>
-            <option value="Heroic Helmet">Heroic Helmet</option>
-        </select>
+        <div style="display: flex; gap: 10px; grid-column: span 1;">
+            <select class="filter-select" id="gift-selector" onchange="filterGifts()" style="flex: 1;">
+                <option value="all">Название подарка</option>
+                <option value="Rare Bird">Rare Bird</option>
+                <option value="Victory Medal">Victory Medal</option>
+                <option value="Artisan Brick">Artisan Brick</option>
+                <option value="Astral Shard">Astral Shard</option>
+                <option value="B-Day Candle">B-Day Candle</option>
+                <option value="Berry Box">Berry Box</option>
+                <option value="Big Year">Big Year</option>
+                <option value="Bling Binky">Bling Binky</option>
+                <option value="Bonded Ring">Bonded Ring</option>
+                <option value="Bow Tie">Bow Tie</option>
+                <option value="Bunny Muffin">Bunny Muffin</option>
+                <option value="Heart Locket">Heart Locket</option>
+                <option value="Plush Pepe">Plush Pepe</option>
+                <option value="Heroic Helmet">Heroic Helmet</option>
+            </select>
+            <div class="clear-filters-btn" onclick="resetFilters()" title="Удалить все фильтры">🗑</div>
+        </div>
         
         <select class="filter-select"><option>Модель</option></select>
         <button class="filter-btn">Каталог фонов</button>
@@ -234,6 +261,12 @@
             const selected = document.getElementById('gift-selector').value;
             renderMarket(selected);
             tg.HapticFeedback.selectionChanged();
+        }
+
+        function resetFilters() {
+            document.getElementById('gift-selector').value = "all";
+            renderMarket("all");
+            tg.HapticFeedback.notificationOccurred('success');
         }
 
         function showPage(pageId) {
