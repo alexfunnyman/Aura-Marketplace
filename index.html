@@ -108,12 +108,7 @@
             flex-shrink: 0;
         }
 
-        .clear-filters-btn:active {
-            transform: scale(0.9);
-            background: rgba(255, 59, 48, 0.1);
-        }
-
-        .full-width { width: 100%; }
+        .clear-filters-btn:active { transform: scale(0.9); }
 
         .page-content { display: none; padding: 0 15px; animation: fadeIn 0.3s ease; }
         .page-content.active { display: grid; }
@@ -128,6 +123,7 @@
             border-radius: 24px;
             padding: 12px;
             text-align: center;
+            position: relative;
         }
 
         .item-preview {
@@ -137,6 +133,32 @@
             display: flex; align-items: center; justify-content: center;
             border-radius: 20px;
             border: 1px solid #222;
+            position: relative;
+        }
+
+        /* Shopping Cart Mini Icon */
+        .cart-mini-icon {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 5;
+            transition: 0.2s;
+        }
+
+        .cart-mini-icon:active {
+            transform: scale(0.9);
+            background: var(--ton-color);
         }
 
         .item-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; height: 34px; display: flex; align-items: center; justify-content: center; }
@@ -176,33 +198,32 @@
             <div class="balance">1.23<span>TON</span></div>
             <div class="profile-btn" onclick="showPage('profile')">👤</div>
         </div>
-        <div class="header-btns">
-            <div id="ton-connect-button"></div>
-        </div>
+        <div id="ton-connect-button"></div>
     </header>
 
     <div id="market-filters" class="filters-container">
         <div class="filter-row">
             <select class="filter-select" id="gift-selector" onchange="filterGifts()">
                 <option value="all">Gifts</option>
-                </select>
-            
+            </select>
             <select class="filter-select"><option>Model</option></select>
-            
             <div class="clear-filters-btn" onclick="resetFilters()">🗑️</div>
         </div>
-        
         <div class="filter-row">
             <button class="filter-btn">Background</button>
             <button class="filter-btn">Symbol</button>
         </div>
-        
         <select class="filter-select full-width"><option>Sort by: Recently added</option></select>
     </div>
 
     <div id="market-page" class="page-content active grid-2"></div>
     <div id="auctions-page" class="page-content grid-2"></div>
-    <div id="gifts-page" class="page-content"></div>
+    <div id="gifts-page" class="page-content">
+        <div style="text-align: center; padding: 50px; color: var(--text-secondary);">
+            <h3>Your Gift Inventory</h3>
+            <p>Purchase items in the market to see them here.</p>
+        </div>
+    </div>
     <div id="activity-page" class="page-content"></div>
     <div id="profile-page" class="page-content"></div>
 
@@ -258,7 +279,10 @@
             const filteredItems = filter === "all" ? inventory : inventory.filter(item => item.name === filter);
             container.innerHTML = filteredItems.map(item => `
                 <div class="item-card">
-                    <div class="item-preview">${item.icon}</div>
+                    <div class="item-preview">
+                        ${item.icon}
+                        <div class="cart-mini-icon" onclick="event.stopPropagation(); showPage('gifts');">🛒</div>
+                    </div>
                     <div class="item-name">${item.name}</div>
                     <div class="item-price">${item.price} TON</div>
                     <button class="btn-main" onclick="buy('${item.name}')">Buy</button>
@@ -287,7 +311,9 @@
             tg.HapticFeedback.impactOccurred('light');
         }
 
-        function buy(name) { tg.showConfirm("Buy " + name + "?"); }
+        function buy(name) { 
+            tg.showConfirm("Buy " + name + "?"); 
+        }
 
         renderMarket();
 
